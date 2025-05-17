@@ -7,7 +7,7 @@ def connect_to_db():
     print("Connecting to db... ", end="")
 
 
-    with open("connection_details.json", "r") as f:
+    with open("db_credentials.json", "r") as f:
         connection_details = json.load(f)
 
     cdb = connection_details
@@ -30,16 +30,17 @@ def connect_to_db():
     return connection_dict
 
 
-def run_query(cdb, query):
+def run_query(cdb, query, params=None):
     cur = cdb["cur"]
     conn = cdb["conn"]
     lock = cdb["lock"]
 
     with lock:
-        cur.execute(query)
+        if params:
+            cur.execute(query, params)
+        else:
+            cur.execute(query)
         conn.commit()
-
-    return
 
 
 def get_query(cdb, query):
@@ -51,3 +52,10 @@ def get_query(cdb, query):
         rows = cur.fetchall()
 
     return rows
+
+def close_query (cdb):
+    cur = cdb["cur"]
+    conn = cdb["conn"]
+
+    cur.close()
+    conn.close()
