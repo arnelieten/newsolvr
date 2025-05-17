@@ -16,6 +16,6 @@ def api_call(topic):
 
     if response.status_code == 200:
         news_data = response.json()
-        return print(json.dumps(news_data, indent=2))
+        return news_data
     else:
-        print(f"Failed to retrieve data {response.status_code}")
+        print(f"Failed to connect with API {response.status_code}")
