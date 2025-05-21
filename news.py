@@ -1,4 +1,4 @@
-from api_utils import api_call
+from newsapi_utils import api_call
 import pandas as pd
 from db_utils import connect_to_db, run_query, close_query
 
@@ -15,7 +15,7 @@ def insert_news_data(df):
     dcb = connect_to_db()
     for row in df.itertuples(index=False):
         run_query(dcb, 
-            """INSERT INTO public.problems 
+            """INSERT INTO public.newsolvr 
             (title_article, description_article, content_article, link_article, published_date) 
             VALUES (%s, %s, %s, %s, %s)
             ON CONFLICT (link_article) DO NOTHING""", 
