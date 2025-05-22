@@ -9,7 +9,10 @@ def api_call(topic):
 
     params = {
         "q" : topic,
-        "language" : "en"
+        "language" : "en",
+        "from" : "2025-05-02",
+        "to" : "2025-05-03"
+
     }
 
     response = requests.get(base_url, headers=headers, params=params)

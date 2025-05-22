@@ -11,7 +11,7 @@ def transform_news_api(topic):
     df = df.drop_duplicates(subset='title')
     return df
 
-def insert_news_data(df):
+def insert_news_api(df):
     dcb = connect_to_db()
     for row in df.itertuples(index=False):
         run_query(dcb, 
@@ -25,4 +25,4 @@ def insert_news_data(df):
 
 current_topic = "problem"
 df = transform_news_api(current_topic)
-insert_news_data(df)
+insert_news_api(df)

@@ -1,4 +1,4 @@
-CREATE TABLE public.problems (
+CREATE TABLE public.newsolvr (
     uid bigserial NOT NULL,
     title_article text NULL,
     description_article text NULL,
