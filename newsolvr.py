@@ -1,4 +1,4 @@
-from newsapi_utils import loop_news_api
+from news_api_utils import loop_news_api
 
 current_topic = "problem NOT no problem"
 

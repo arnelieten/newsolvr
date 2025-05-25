@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 def api_call(topic, from_date, to_date):
     base_url = "https://newsapi.org/v2/everything"
 
-    with open("api_credentials.json", "r") as f:
+    with open("news_api_credentials.json", "r") as f:
         headers = json.load(f)
 
     params = {
