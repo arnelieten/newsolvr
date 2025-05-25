@@ -32,7 +32,7 @@ def transform_news_api(topic, from_date, to_date):
 
     df = pd.json_normalize(news_data, 'articles')
     df = df[['title', 'description', 'content', 'publishedAt', 'url']]
-    df = df.dropna(subset=['title', 'description', 'content'])
+    df = df.dropna(subset=['title', 'content'])
     df = df.drop_duplicates(subset='title')
     return df
 
@@ -48,10 +48,11 @@ def insert_news_api(df):
     close_query(dcb)
 
 def loop_news_api(current_topic,iterations):
+    # implement solution to not error if no articles found!!
+    from_date = datetime.now() - timedelta(minutes=1620)
+    to_date = datetime.now() - timedelta(minutes=1560)
+    
     for i in range(iterations): #100 free api calls per day
-        from_date = datetime.now() - timedelta(minutes=1620)
-        to_date = datetime.now() - timedelta(minutes=1560)
-
         df = transform_news_api(current_topic, from_date, to_date)
         insert_news_api(df)
 
