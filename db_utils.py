@@ -4,9 +4,6 @@ import psycopg2
 
 
 def connect_to_db():
-    print("Connecting to db... ", end="")
-
-
     with open("db_credentials.json", "r") as f:
         connection_details = json.load(f)
 
@@ -24,9 +21,6 @@ def connect_to_db():
         "conn": conn,
         "lock": lock,
     }
-
-    print("Done!")
-
     return connection_dict
 
 

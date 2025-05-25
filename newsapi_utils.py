@@ -2,6 +2,7 @@ import requests
 import json
 import pandas as pd
 from db_utils import connect_to_db, run_query, close_query
+from datetime import datetime, timedelta
 
 def api_call(topic, from_date, to_date):
     base_url = "https://newsapi.org/v2/everything"
@@ -45,3 +46,15 @@ def insert_news_api(df):
             ON CONFLICT (link_article) DO NOTHING""", 
             (row.title, row.description, row.content, row.url, row.publishedAt))
     close_query(dcb)
+
+def loop_news_api(current_topic,iterations):
+    for i in range(iterations): #100 free api calls per day
+        from_date = datetime.now() - timedelta(minutes=1620)
+        to_date = datetime.now() - timedelta(minutes=1560)
+
+        df = transform_news_api(current_topic, from_date, to_date)
+        insert_news_api(df)
+
+        from_date -= timedelta(minutes=60)
+        to_date -= timedelta(minutes=60)
+        print(f"loop{i}")
