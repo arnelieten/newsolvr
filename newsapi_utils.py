@@ -1,7 +1,9 @@
 import requests
 import json
+import pandas as pd
+from db_utils import connect_to_db, run_query, close_query
 
-def api_call(topic):
+def api_call(topic, from_date, to_date):
     base_url = "https://newsapi.org/v2/everything"
 
     with open("api_credentials.json", "r") as f:
@@ -10,8 +12,8 @@ def api_call(topic):
     params = {
         "q" : topic,
         "language" : "en",
-        "from" : "2025-05-02",
-        "to" : "2025-05-03"
+        "from" : from_date,
+        "to" : to_date
 
     }
 
@@ -22,3 +24,24 @@ def api_call(topic):
         return news_data
     else:
         print(f"Failed to connect with API {response.status_code}")
+
+
+def transform_news_api(topic, from_date, to_date):
+    news_data = api_call(topic, from_date, to_date)
+
+    df = pd.json_normalize(news_data, 'articles')
+    df = df[['title', 'description', 'content', 'publishedAt', 'url']]
+    df = df.dropna(subset=['title', 'description', 'content'])
+    df = df.drop_duplicates(subset='title')
+    return df
+
+def insert_news_api(df):
+    dcb = connect_to_db()
+    for row in df.itertuples(index=False):
+        run_query(dcb, 
+            """INSERT INTO public.newsolvr 
+            (title_article, description_article, content_article, link_article, published_date) 
+            VALUES (%s, %s, %s, %s, %s)
+            ON CONFLICT (link_article) DO NOTHING""", 
+            (row.title, row.description, row.content, row.url, row.publishedAt))
+    close_query(dcb)
