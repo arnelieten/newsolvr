@@ -2,7 +2,7 @@ import json
 from google import genai
 from google.genai import types
 from pydantic import BaseModel
-from db_utils import connect_to_db, close_query, get_query
+from db_utils import connect_to_db, close_query, get_query, run_query
 
 def fetch_news_article():
      dcb = connect_to_db()
@@ -35,7 +35,19 @@ def llm_call():
             response_mime_type = "application/json",
             response_schema= list[Analysis]),
         contents=article)
-    report = response.text
+    report = json.loads(response.text)
+    report = report[0]
     return report
 
-llm_call()
+def insert_report():
+    dcb = connect_to_db()
+    report = llm_call()
+    run_query(dcb, 
+        """INSERT INTO public.newsolvr 
+        (problem_verified, problem_summary, target_market, startup_idea, business_model) 
+        VALUES (%s, %s, %s, %s, %s)""",
+        (report["problem_verified"], report["problem_summary"], report["target_market"], report["startup_idea"], report["business_model"]))
+    close_query(dcb)
+    print('done')
+
+insert_report()
