@@ -6,7 +6,7 @@ from db_utils import connect_to_db, close_query, get_query, run_query
 
 def fetch_news_article():
      dcb = connect_to_db()
-     articles = get_query(dcb, """SELECT content_article from public.newsolvr""")
+     articles = get_query(dcb, """SELECT uid,content_article from public.newsolvr""")
      close_query(dcb)
      return articles
 
@@ -17,13 +17,10 @@ class Analysis(BaseModel):
     startup_idea: str
     business_model: str
 
-def llm_call():
+def llm_call(article):
     with open("llm_api_credentials.json", "r") as f:
             headers = json.load(f)
             API_KEY = headers['api-key']
-    
-    articles = fetch_news_article()
-    article = articles[9]
 
     client = genai.Client(api_key=API_KEY)
 
@@ -35,19 +32,25 @@ def llm_call():
             response_mime_type = "application/json",
             response_schema= list[Analysis]),
         contents=article)
-    report = json.loads(response.text)
-    report = report[0]
+    report = json.loads(response.text)[0]
     return report
 
 def insert_report():
     dcb = connect_to_db()
-    report = llm_call()
-    run_query(dcb, 
-        """INSERT INTO public.newsolvr 
-        (problem_verified, problem_summary, target_market, startup_idea, business_model) 
-        VALUES (%s, %s, %s, %s, %s)""",
-        (report["problem_verified"], report["problem_summary"], report["target_market"], report["startup_idea"], report["business_model"]))
+    articles=fetch_news_article()
+
+    for uid,article in articles:
+        report = llm_call(article)  
+        run_query(dcb, 
+            """UPDATE public.newsolvr SET 
+                problem_verified = %s, 
+                problem_summary = %s, 
+                target_market = %s, 
+                startup_idea = %s, 
+                business_model = %s 
+            WHERE uid = %s""",
+            (report["problem_verified"], report["problem_summary"], report["target_market"], report["startup_idea"], report["business_model"], uid))
+        print('done')
     close_query(dcb)
-    print('done')
 
 insert_report()
