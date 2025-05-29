@@ -58,4 +58,4 @@ def loop_news_api(current_topic,iterations):
 
         from_date -= timedelta(minutes=60)
         to_date -= timedelta(minutes=60)
-        print(f"loop{i}")
+        print(f"News articles batch {i+1} inserted")
