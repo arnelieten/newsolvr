@@ -1,16 +1,12 @@
-import json
 import threading
 import psycopg2
-
+from dotenv import dotenv_values
 
 def connect_to_db():
-    with open("db_credentials.json", "r") as f:
-        connection_details = json.load(f)
-
-    cdb = connection_details
+    config = dotenv_values(".env")
 
     conn = psycopg2.connect(
-        host=cdb["host"], port=cdb["port"], database=cdb["database"], user=cdb["user"], password=cdb["password"]
+        host=config["DB_HOST"], port=config["DB_PORT"], database=config["DB_DATABASE"], user=config["DB_USER"], password=config["DB_PASSWORD"]
     )
 
     cur = conn.cursor()

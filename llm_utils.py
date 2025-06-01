@@ -1,5 +1,6 @@
 import json
 import time
+from dotenv import dotenv_values
 from google import genai
 from google.genai import types
 from pydantic import BaseModel
@@ -22,11 +23,10 @@ def fetch_news_article():
      return articles
 
 def llm_call(article):
-    with open("llm_api_credentials.json", "r") as f:
-            headers = json.load(f)
-            API_KEY = headers['api-key']
+    config = dotenv_values(".env")
+    GEMINI_API_KEY = config["GEMINI_API_KEY"]
 
-    client = genai.Client(api_key=API_KEY)
+    client = genai.Client(api_key=GEMINI_API_KEY)
 
     response = client.models.generate_content(
         model="gemini-2.0-flash",

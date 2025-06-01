@@ -1,21 +1,22 @@
 import requests
-import json
 import pandas as pd
+from dotenv import dotenv_values
 from db_utils import connect_to_db, run_query, close_query
 from datetime import datetime, timedelta
 
 def api_call(topic, from_date, to_date):
     base_url = "https://newsapi.org/v2/everything"
 
-    with open("news_api_credentials.json", "r") as f:
-        headers = json.load(f)
+    config = dotenv_values(".env")
+    headers = {
+    "X-API-Key": config["NEWS_API_KEY"]
+    }
 
     params = {
         "q" : topic,
         "language" : "en",
         "from" : from_date,
         "to" : to_date
-
     }
 
     response = requests.get(base_url, headers=headers, params=params)

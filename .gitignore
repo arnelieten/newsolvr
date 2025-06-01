@@ -4,3 +4,4 @@ db_credentials.json
 news_api_credentials.json
 llm_api_credentials.json
 ideas.txt
+.env
