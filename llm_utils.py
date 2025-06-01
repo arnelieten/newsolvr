@@ -16,7 +16,8 @@ class Analysis(BaseModel):
 
 def fetch_news_article():
      dcb = connect_to_db()
-     articles = get_query(dcb, """SELECT uid,content_article from public.newsolvr""")
+     articles = get_query(dcb, """SELECT uid,content_article from public.newsolvr
+                          WHERE problem_verified IS NULL""")
      close_query(dcb)
      return articles
 
