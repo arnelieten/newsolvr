@@ -49,11 +49,10 @@ def insert_news_api(df):
     close_query(dcb)
 
 def loop_news_api(current_topic,iterations):
-    # implement solution to not error if no articles found!!
-    from_date = datetime.now() - timedelta(minutes=1620)
-    to_date = datetime.now() - timedelta(minutes=1560)
-    
-    for i in range(iterations): #100 free api calls per day
+    from_date = datetime.now() - timedelta(minutes=1620) # create a 60 minute window to fetch all news articles
+    to_date = datetime.now() - timedelta(minutes=1560) # 24 + 2 hours lag in free version
+
+    for i in range(iterations):
         df = transform_news_api(current_topic, from_date, to_date)
         insert_news_api(df)
 
