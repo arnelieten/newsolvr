@@ -11,9 +11,10 @@ RATE_LIMIT_RPD = 500
 class Analysis(BaseModel):
     problem_verified: str
     problem_summary: str
-    target_market: str
+    evidence_from_article: str
     startup_idea: str
-    business_model: str
+    why_now: str
+    early_adopters: str
 
 def fetch_news_article():
      dcb = connect_to_db()
@@ -22,8 +23,14 @@ def fetch_news_article():
      close_query(dcb)
      return articles
 
+def open_llm_instructions():
+    with open("llm_instructions.txt", "r", encoding="utf-8") as f:
+        instructions = f.read()
+    return instructions
+
 def llm_call(article):
     config = dotenv_values(".env")
+    instructions = open_llm_instructions()
     GEMINI_API_KEY = config["GEMINI_API_KEY"]
 
     client = genai.Client(api_key=GEMINI_API_KEY)
@@ -31,7 +38,7 @@ def llm_call(article):
     response = client.models.generate_content(
         model="gemini-2.0-flash",
         config=types.GenerateContentConfig(
-            system_instruction = "You are experienced serial entrepreneur that is doing market research, for this you scan the internet for relevant problems. The input you are getting is a newsarticle and I am asking you for your perspective. Question 1: is this really a problem where someone could build a startup around, be strict and put yes or no in 'problem_verified' of the response schema. Question 2: if it is a real problem summarize the problem, if not a real problem just put N/A 'problem_verified' of the response schema. Question 3: How big is the target market for this problem in euros, if you do not know put 0 in 'target_market' of the response schema. Question 4: Be creative and invent a startup idea and put a short description in 'startup_idea' of the response schema. Question 5: based on your invented startup idea, is it B2C or B2B and put that answer in 'business_model' of the response schema.",
+            system_instruction = instructions,
             max_output_tokens = 1000,
             response_mime_type = "application/json",
             response_schema= list[Analysis]),
@@ -53,11 +60,12 @@ def insert_report():
             """UPDATE public.newsolvr SET 
                 problem_verified = %s, 
                 problem_summary = %s, 
-                target_market = %s, 
+                evidence_from_article = %s, 
                 startup_idea = %s, 
-                business_model = %s 
+                why_now = %s,
+                early_adopters = %s
             WHERE uid = %s""",
-            (report["problem_verified"], report["problem_summary"], report["target_market"], report["startup_idea"], report["business_model"], uid))
+            (report["problem_verified"], report["problem_summary"], report["evidence_from_article"], report["startup_idea"], report["why_now"], report["early_adopters"], uid))
         article_count += 1
         print(f'News article {article_count} analysed')
         time.sleep(60/RATE_LIMIT_RPM)
