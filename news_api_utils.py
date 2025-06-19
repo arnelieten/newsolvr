@@ -48,9 +48,9 @@ def insert_news_api(df):
             (row.title, row.description, row.content, row.url, row.publishedAt))
     close_query(dcb)
 
-def loop_news_api(current_topic,iterations):
-    from_date = datetime.now() - timedelta(minutes=1620) # create a 60 minute window to fetch all news articles
-    to_date = datetime.now() - timedelta(minutes=1560) # 24 + 2 hours lag in free version
+def loop_news_api(current_topic,iterations, window):
+    from_date = datetime.now() - timedelta(minutes= 1560 + window) # create a custom length window to fetch all news articles
+    to_date = datetime.now() - timedelta(minutes= 1560) # 24 + 2 hours lag in free version
 
     for i in range(iterations):
         df = transform_news_api(current_topic, from_date, to_date)
