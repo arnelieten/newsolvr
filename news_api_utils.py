@@ -49,7 +49,7 @@ def insert_news_api(df):
     close_query(dcb)
 
 def loop_news_api(current_topic,iterations, window):
-    from_date = datetime.now() - timedelta(minutes= 1560 + window) # create a custom length window to fetch all news articles
+    from_date = datetime.now() - timedelta(minutes= 1560 + window*60) # create a custom length window to fetch all news articles
     to_date = datetime.now() - timedelta(minutes= 1560) # 24 + 2 hours lag in free version
 
     for i in range(iterations):
