@@ -52,7 +52,7 @@ def insert_report():
     article_count = 0
 
     for uid,article in articles:
-        if article_count > RATE_LIMIT_RPD:
+        if article_count >= RATE_LIMIT_RPD:
             break
 
         report = llm_call(article)  
