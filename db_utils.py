@@ -1,12 +1,13 @@
 import threading
+
 import psycopg2
-from dotenv import dotenv_values
+
+from config.config import DB_DATABASE, DB_HOST, DB_PASSWORD, DB_PORT, DB_USER
+
 
 def connect_to_db():
-    config = dotenv_values(".env")
-
     conn = psycopg2.connect(
-        host=config["DB_HOST"], port=config["DB_PORT"], database=config["DB_DATABASE"], user=config["DB_USER"], password=config["DB_PASSWORD"]
+        host=DB_HOST, port=DB_PORT, database=DB_DATABASE, user=DB_USER, password=DB_PASSWORD
     )
 
     cur = conn.cursor()
@@ -20,10 +21,10 @@ def connect_to_db():
     return connection_dict
 
 
-def run_query(cdb, query, params=None):
-    cur = cdb["cur"]
-    conn = cdb["conn"]
-    lock = cdb["lock"]
+def run_query(db_connection, query, params=None):
+    cur = db_connection["cur"]
+    conn = db_connection["conn"]
+    lock = db_connection["lock"]
 
     with lock:
         if params:
@@ -33,19 +34,23 @@ def run_query(cdb, query, params=None):
         conn.commit()
 
 
-def get_query(cdb, query):
-    cur = cdb["cur"]
-    lock = cdb["lock"]
+def get_query(db_connection, query, params=None):
+    cur = db_connection["cur"]
+    lock = db_connection["lock"]
 
     with lock:
-        cur.execute(query)
+        if params:
+            cur.execute(query, params)
+        else:
+            cur.execute(query)
         rows = cur.fetchall()
 
     return rows
 
-def close_query (cdb):
-    cur = cdb["cur"]
-    conn = cdb["conn"]
+
+def close_db(db_connection):
+    cur = db_connection["cur"]
+    conn = db_connection["conn"]
 
     cur.close()
     conn.close()
