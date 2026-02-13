@@ -26,7 +26,7 @@ def fetch_news_article():
     db_connection = connect_to_db()
     articles = get_query(
         db_connection,
-        """SELECT uid,content_article from public.newsolvr
+        """SELECT uid, content_article FROM newsolvr
                           WHERE problem_verified IS NULL""",
     )
     close_db(db_connection)
@@ -69,14 +69,14 @@ def insert_report():
         report = llm_call(article)
         run_query(
             db_connection,
-            """UPDATE public.newsolvr SET 
-                problem_verified = %s, 
-                problem_summary = %s, 
-                evidence_from_article = %s, 
-                startup_idea = %s, 
-                why_now = %s,
-                early_adopters = %s
-            WHERE uid = %s""",
+            """UPDATE newsolvr SET
+                problem_verified = ?,
+                problem_summary = ?,
+                evidence_from_article = ?,
+                startup_idea = ?,
+                why_now = ?,
+                early_adopters = ?
+            WHERE uid = ?""",
             (
                 report["problem_verified"],
                 report["problem_summary"],

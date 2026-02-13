@@ -42,9 +42,9 @@ def insert_news_api(df):
     for row in df.itertuples(index=False):
         run_query(
             db_connection,
-            """INSERT INTO public.newsolvr 
-            (title_article, description_article, content_article, link_article, published_date) 
-            VALUES (%s, %s, %s, %s, %s)
+            """INSERT INTO newsolvr
+            (title_article, description_article, content_article, link_article, published_date)
+            VALUES (?, ?, ?, ?, ?)
             ON CONFLICT (link_article) DO NOTHING""",
             (row.title, row.description, row.content, row.url, row.publishedAt),
         )

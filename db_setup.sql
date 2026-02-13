@@ -1,13 +1,16 @@
-CREATE TABLE public.newsolvr (
-    uid bigserial PRIMARY KEY,
-    title_article text NULL,
-    description_article text NULL,
-    content_article text NULL,
-    link_article text NULL UNIQUE,
-    published_date date,
-    problem_verified text NULL,
-    problem_summary text NULL, 
-    target_market text NULL, 
-    startup_idea text NULL, 
-    business_model text NULL
+-- SQLite schema (table is created automatically on first connect via db_utils).
+-- For reference only:
+CREATE TABLE IF NOT EXISTS newsolvr (
+    uid INTEGER PRIMARY KEY AUTOINCREMENT,
+    title_article TEXT,
+    description_article TEXT,
+    content_article TEXT,
+    link_article TEXT UNIQUE,
+    published_date TEXT,
+    problem_verified TEXT,
+    problem_summary TEXT,
+    evidence_from_article TEXT,
+    startup_idea TEXT,
+    why_now TEXT,
+    early_adopters TEXT
 );

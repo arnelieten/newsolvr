@@ -1,24 +1,33 @@
+import sqlite3
 import threading
 
-import psycopg2
+from config.config import DB_PATH
 
-from config.config import DB_DATABASE, DB_HOST, DB_PASSWORD, DB_PORT, DB_USER
+INIT_SQL = """
+CREATE TABLE IF NOT EXISTS newsolvr (
+    uid INTEGER PRIMARY KEY AUTOINCREMENT,
+    title_article TEXT,
+    description_article TEXT,
+    content_article TEXT,
+    link_article TEXT UNIQUE,
+    published_date TEXT,
+    problem_verified TEXT,
+    problem_summary TEXT,
+    evidence_from_article TEXT,
+    startup_idea TEXT,
+    why_now TEXT,
+    early_adopters TEXT
+);
+"""
 
 
 def connect_to_db():
-    conn = psycopg2.connect(
-        host=DB_HOST, port=DB_PORT, database=DB_DATABASE, user=DB_USER, password=DB_PASSWORD
-    )
-
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute(INIT_SQL)
+    conn.commit()
     cur = conn.cursor()
     lock = threading.Lock()
-
-    connection_dict = {
-        "cur": cur,
-        "conn": conn,
-        "lock": lock,
-    }
-    return connection_dict
+    return {"cur": cur, "conn": conn, "lock": lock}
 
 
 def run_query(db_connection, query, params=None):
@@ -49,8 +58,5 @@ def get_query(db_connection, query, params=None):
 
 
 def close_db(db_connection):
-    cur = db_connection["cur"]
-    conn = db_connection["conn"]
-
-    cur.close()
-    conn.close()
+    db_connection["cur"].close()
+    db_connection["conn"].close()
