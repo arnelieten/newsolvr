@@ -1,16 +1,11 @@
-from datetime import datetime, timedelta
-
 import pandas as pd
 import requests
 
 from config.config import NEWS_API_KEY
-from utils.db_utils import close_db, connect_to_db, run_query
-
-LAG_MINUTES = 1560  # 24h + 2h lag for free API
-STEP_MINUTES = 60
+from utils.db_utils import run_query
 
 
-def api_call(topic, from_date, to_date):
+def call_news_api_endpoint(topic, from_date, to_date):
     base_url = "https://newsapi.org/v2/everything"
 
     headers = {"X-API-Key": NEWS_API_KEY}
@@ -25,8 +20,8 @@ def api_call(topic, from_date, to_date):
     return None
 
 
-def transform_news_api(topic, from_date, to_date):
-    news_data = api_call(topic, from_date, to_date)
+def transform_news_api_output(topic, from_date, to_date):
+    news_data = call_news_api_endpoint(topic, from_date, to_date)
     if news_data is None:
         return pd.DataFrame()
 
@@ -37,8 +32,8 @@ def transform_news_api(topic, from_date, to_date):
     return df
 
 
-def insert_news_api(df):
-    db_connection = connect_to_db()
+def save_news_api_output(db_connection, df):
+    """Insert news API rows into newsolvr. Caller manages connection lifecycle."""
     for row in df.itertuples(index=False):
         run_query(
             db_connection,
@@ -48,17 +43,3 @@ def insert_news_api(df):
             ON CONFLICT (link_article) DO NOTHING""",
             (row.title, row.description, row.content, row.url, row.publishedAt),
         )
-    close_db(db_connection)
-
-
-def loop_news_api(current_topic, iterations, window):
-    from_date = datetime.now() - timedelta(minutes=LAG_MINUTES + window * STEP_MINUTES)
-    to_date = datetime.now() - timedelta(minutes=LAG_MINUTES)
-
-    for i in range(iterations):
-        df = transform_news_api(current_topic, from_date, to_date)
-        insert_news_api(df)
-
-        from_date -= timedelta(minutes=STEP_MINUTES)
-        to_date -= timedelta(minutes=STEP_MINUTES)
-        print(f"News articles batch {i + 1} inserted")
