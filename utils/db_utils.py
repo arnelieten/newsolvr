@@ -1,5 +1,3 @@
-import csv
-import os
 import sqlite3
 import threading
 
@@ -13,14 +11,40 @@ CREATE TABLE IF NOT EXISTS newsolvr (
     content_article TEXT,
     link_article TEXT UNIQUE,
     published_date TEXT,
-    problem_verified TEXT,
-    problem_summary TEXT,
-    evidence_from_article TEXT,
-    startup_idea TEXT,
-    why_now TEXT,
-    early_adopters TEXT
+    problem_statement TEXT,
+    meaningful_problem INTEGER,
+    pain_intensity INTEGER,
+    frequency INTEGER,
+    problem_size TEXT,
+    market_growth INTEGER,
+    willingness_to_pay INTEGER,
+    target_customer_clarity INTEGER,
+    problem_awareness INTEGER,
+    competition INTEGER,
+    software_solution INTEGER,
+    ai_fit INTEGER,
+    speed_to_mvp INTEGER,
+    business_potential INTEGER,
+    time_relevancy INTEGER
 );
 """
+
+RANKING_COLUMNS = (
+    "meaningful_problem",
+    "pain_intensity",
+    "frequency",
+    "problem_size",
+    "market_growth",
+    "willingness_to_pay",
+    "target_customer_clarity",
+    "problem_awareness",
+    "differentiation_potential",
+    "software_solution",
+    "ai_fit",
+    "speed_to_mvp",
+    "business_potential",
+    "time_relevancy",
+)
 
 
 def connect_to_db():
@@ -62,33 +86,3 @@ def get_query(db_connection, query, params=None):
 def close_db(db_connection):
     db_connection["cur"].close()
     db_connection["conn"].close()
-
-
-NEWSOLVR_COLUMNS = (
-    "uid",
-    "title_article",
-    "description_article",
-    "content_article",
-    "link_article",
-    "published_date",
-    "problem_verified",
-    "problem_summary",
-    "evidence_from_article",
-    "startup_idea",
-    "why_now",
-    "early_adopters",
-)
-
-
-def export_db_to_csv():
-    out = os.path.join(os.path.dirname(__file__), "..", "database", "db_export.csv")
-    db = connect_to_db()
-    try:
-        rows = get_query(db, f"SELECT {', '.join(NEWSOLVR_COLUMNS)} FROM newsolvr ORDER BY uid")
-        with open(out, "w", newline="", encoding="utf-8") as f:
-            w = csv.writer(f)
-            w.writerow(NEWSOLVR_COLUMNS)
-            w.writerows(["" if v is None else v for v in row] for row in rows)
-        return len(rows)
-    finally:
-        close_db(db)

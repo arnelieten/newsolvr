@@ -13,24 +13,24 @@ RATE_LIMIT_RPM = 15
 RATE_LIMIT_RPD = 500
 
 
-class Analysis(BaseModel):
-    problem_verified: str
-    problem_summary: str
-    evidence_from_article: str
-    startup_idea: str
-    why_now: str
-    early_adopters: str
+class ProblemReport(BaseModel):
+    """Matches problem_analyzer.md: one summary + 14 scores (1–5)."""
 
-
-def fetch_news_article():
-    db_connection = connect_to_db()
-    articles = get_query(
-        db_connection,
-        """SELECT uid, content_article FROM newsolvr
-                          WHERE problem_verified IS NULL""",
-    )
-    close_db(db_connection)
-    return articles
+    problem_statement: str
+    meaningful_problem: int
+    pain_intensity: int
+    frequency: int
+    problem_size: int
+    market_growth: int
+    willingness_to_pay: int
+    target_customer_clarity: int
+    problem_awareness: int
+    differentiation_potential: int
+    software_solution: int
+    ai_fit: int
+    speed_to_mvp: int
+    business_potential: int
+    time_relevancy: int
 
 
 def fetch_prompt():
@@ -38,56 +38,71 @@ def fetch_prompt():
     return path.read_text(encoding="utf-8")
 
 
-def llm_call(article):
-    instructions = fetch_prompt()
+def fetch_unanalyzed_articles():
+    conn = connect_to_db()
+    rows = get_query(
+        conn, "SELECT uid, content_article FROM newsolvr WHERE problem_statement IS NULL"
+    )
+    close_db(conn)
+    return rows
 
+
+def analyze_article(article: str) -> dict:
+    """Returns dict with problem_statement (str) and 14 score keys (int 1–5)."""
     client = genai.Client(api_key=GEMINI_API_KEY)
-
     response = client.models.generate_content(
         model="gemini-2.5-flash-lite",
         config=types.GenerateContentConfig(
-            system_instruction=instructions,
+            system_instruction=fetch_prompt(),
             max_output_tokens=1000,
             response_mime_type="application/json",
-            response_schema=list[Analysis],
+            response_schema=ProblemReport,
         ),
         contents=article,
     )
-    report = json.loads(response.text)[0]
-    return report
+    return json.loads(response.text)
 
 
-def insert_report():
-    db_connection = connect_to_db()
-    articles = fetch_news_article()
-    article_count = 0
+def generate_report():
+    conn = connect_to_db()
+    articles = fetch_unanalyzed_articles()
+    count = 0
 
-    for uid, article in articles:
-        if article_count >= RATE_LIMIT_RPD:
+    for uid, content in articles:
+        if count >= RATE_LIMIT_RPD:
             break
+        report = analyze_article(content)
 
-        report = llm_call(article)
         run_query(
-            db_connection,
+            conn,
             """UPDATE newsolvr SET
-                problem_verified = ?,
-                problem_summary = ?,
-                evidence_from_article = ?,
-                startup_idea = ?,
-                why_now = ?,
-                early_adopters = ?
+                problem_statement = ?, meaningful_problem = ?, pain_intensity = ?,
+                frequency = ?, problem_size = ?, market_growth = ?, willingness_to_pay = ?,
+                target_customer_clarity = ?, problem_awareness = ?, competition = ?,
+                software_solution = ?, ai_fit = ?, speed_to_mvp = ?,
+                business_potential = ?, time_relevancy = ?
             WHERE uid = ?""",
             (
-                report["problem_verified"],
-                report["problem_summary"],
-                report["evidence_from_article"],
-                report["startup_idea"],
-                report["why_now"],
-                report["early_adopters"],
+                report["problem_statement"],
+                report["meaningful_problem"],
+                report["pain_intensity"],
+                report["frequency"],
+                report["problem_size"],
+                report["market_growth"],
+                report["willingness_to_pay"],
+                report["target_customer_clarity"],
+                report["problem_awareness"],
+                report["differentiation_potential"],
+                report["software_solution"],
+                report["ai_fit"],
+                report["speed_to_mvp"],
+                report["business_potential"],
+                report["time_relevancy"],
                 uid,
             ),
         )
-        article_count += 1
-        print(f"News article {article_count} analysed")
+        count += 1
+        print(f"Analysis complete for: article {count}")
         time.sleep(60 / RATE_LIMIT_RPM)
-    close_db(db_connection)
+
+    close_db(conn)
