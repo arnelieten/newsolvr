@@ -22,17 +22,19 @@ NEWS_API_SEARCH_TOPIC = "problem OR issue NOT (no problem OR no issue)"
 def run_article_extraction_pipeline(iterations: int = 24):
     """Fetch news articles from News API and persist to database. NEWS_API_EXTRACTION_LAG_MINUTES is needed becasue the free api only allows news from 24 hours back, the NEWS_API_EXTRACTION_WINDOW is a paramter that indicates the time period over which it retrieves all the articles (default 60 minutes). The iterations parameters decides how many windows of 60 minutes are run, default is 24 to capture news for whole day."""
     conn = connect_to_db()
-    from_date = datetime.now() - timedelta(
-        minutes=NEWS_API_EXTRACTION_LAG_MINUTES + NEWS_API_EXTRACTION_WINDOW
-    )
-    to_date = datetime.now() - timedelta(minutes=NEWS_API_EXTRACTION_LAG_MINUTES)
+    window_delta = timedelta(minutes=NEWS_API_EXTRACTION_WINDOW)
+    lag_delta = timedelta(minutes=NEWS_API_EXTRACTION_LAG_MINUTES)
 
-    for i in range(iterations):
+    to_date = datetime.now() - lag_delta
+    from_date = to_date - window_delta
+
+    for n in range(iterations):
         raw_news_articles = get_news_api_articles(NEWS_API_SEARCH_TOPIC, from_date, to_date)
         df_transformed_news_articles = transform_news_api_articles(raw_news_articles)
         save_news_api_articles(conn, df_transformed_news_articles)
-        from_date -= timedelta(minutes=NEWS_API_EXTRACTION_WINDOW)
-        to_date -= timedelta(minutes=NEWS_API_EXTRACTION_WINDOW)
+
+        from_date -= window_delta
+        to_date -= window_delta
 
     print("Pipeline complete: extract news articles from api.")
     close_db(conn)
