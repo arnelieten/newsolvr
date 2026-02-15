@@ -1,8 +1,9 @@
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
 # Database
 DB_PATH = os.getenv("DB_PATH")

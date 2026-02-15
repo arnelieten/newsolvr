@@ -4,7 +4,7 @@ import pandas as pd
 import requests
 
 from config.config import NEWS_API_KEY
-from db_utils import close_db, connect_to_db, run_query
+from utils.db_utils import close_db, connect_to_db, run_query
 
 LAG_MINUTES = 1560  # 24h + 2h lag for free API
 STEP_MINUTES = 60

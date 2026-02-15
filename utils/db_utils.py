@@ -1,3 +1,5 @@
+import csv
+import os
 import sqlite3
 import threading
 
@@ -60,3 +62,33 @@ def get_query(db_connection, query, params=None):
 def close_db(db_connection):
     db_connection["cur"].close()
     db_connection["conn"].close()
+
+
+NEWSOLVR_COLUMNS = (
+    "uid",
+    "title_article",
+    "description_article",
+    "content_article",
+    "link_article",
+    "published_date",
+    "problem_verified",
+    "problem_summary",
+    "evidence_from_article",
+    "startup_idea",
+    "why_now",
+    "early_adopters",
+)
+
+
+def export_db_to_csv():
+    out = os.path.join(os.path.dirname(__file__), "..", "database", "db_export.csv")
+    db = connect_to_db()
+    try:
+        rows = get_query(db, f"SELECT {', '.join(NEWSOLVR_COLUMNS)} FROM newsolvr ORDER BY uid")
+        with open(out, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(NEWSOLVR_COLUMNS)
+            w.writerows(["" if v is None else v for v in row] for row in rows)
+        return len(rows)
+    finally:
+        close_db(db)

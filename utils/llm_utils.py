@@ -7,7 +7,7 @@ from google.genai import types
 from pydantic import BaseModel
 
 from config.config import GEMINI_API_KEY
-from db_utils import close_db, connect_to_db, get_query, run_query
+from utils.db_utils import close_db, connect_to_db, get_query, run_query
 
 RATE_LIMIT_RPM = 15
 RATE_LIMIT_RPD = 500
@@ -33,18 +33,18 @@ def fetch_news_article():
     return articles
 
 
-def get_llm_instructions():
-    path = Path(__file__).parent / "llm_instructions.txt"
+def fetch_prompt():
+    path = Path(__file__).parent.parent / "prompts" / "problem_analyzer.md"
     return path.read_text(encoding="utf-8")
 
 
 def llm_call(article):
-    instructions = get_llm_instructions()
+    instructions = fetch_prompt()
 
     client = genai.Client(api_key=GEMINI_API_KEY)
 
     response = client.models.generate_content(
-        model="gemini-2.0-flash",
+        model="gemini-2.5-flash-lite",
         config=types.GenerateContentConfig(
             system_instruction=instructions,
             max_output_tokens=1000,
