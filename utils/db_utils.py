@@ -29,23 +29,6 @@ CREATE TABLE IF NOT EXISTS newsolvr (
 );
 """
 
-RANKING_COLUMNS = (
-    "meaningful_problem",
-    "pain_intensity",
-    "frequency",
-    "problem_size",
-    "market_growth",
-    "willingness_to_pay",
-    "target_customer_clarity",
-    "problem_awareness",
-    "differentiation_potential",
-    "software_solution",
-    "ai_fit",
-    "speed_to_mvp",
-    "business_potential",
-    "time_relevancy",
-)
-
 
 def connect_to_db():
     conn = sqlite3.connect(DB_PATH)
@@ -86,3 +69,43 @@ def get_query(db_connection, query, params=None):
 def close_db(db_connection):
     db_connection["cur"].close()
     db_connection["conn"].close()
+
+
+def fetch_unanalyzed_articles(db_connection):
+    """Return list of (uid, content_article) for rows where problem_statement IS NULL."""
+    return get_query(
+        db_connection,
+        "SELECT uid, content_article FROM newsolvr WHERE problem_statement IS NULL",
+    )
+
+
+def save_article_analysis(db_connection, uid: int, report: dict) -> None:
+    """Saves an LLM-analyzed article to the database."""
+    run_query(
+        db_connection,
+        """UPDATE newsolvr SET
+            problem_statement = ?, meaningful_problem = ?, pain_intensity = ?,
+            frequency = ?, problem_size = ?, market_growth = ?, willingness_to_pay = ?,
+            target_customer_clarity = ?, problem_awareness = ?, competition = ?,
+            software_solution = ?, ai_fit = ?, speed_to_mvp = ?,
+            business_potential = ?, time_relevancy = ?
+        WHERE uid = ?""",
+        (
+            report["problem_statement"],
+            report["meaningful_problem"],
+            report["pain_intensity"],
+            report["frequency"],
+            report["problem_size"],
+            report["market_growth"],
+            report["willingness_to_pay"],
+            report["target_customer_clarity"],
+            report["problem_awareness"],
+            report["differentiation_potential"],
+            report["software_solution"],
+            report["ai_fit"],
+            report["speed_to_mvp"],
+            report["business_potential"],
+            report["time_relevancy"],
+            uid,
+        ),
+    )
