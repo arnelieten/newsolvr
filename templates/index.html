@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newsolvr</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="header">
+        <h1>Newsolvr</h1>
+    </header>
+    <main class="main">
+        {% for problem in problems %}
+        <article class="card">
+            <p class="card__problem">{{ problem.problem_statement }}</p>
+            <footer class="card__footer">
+                <span class="card__score">Score: {{ problem.score|round(1) }}/5</span>
+                <a class="card__link" href="{{ problem.link_article }}" target="_blank" rel="noopener noreferrer">Read article</a>
+            </footer>
+        </article>
+        {% else %}
+        <p class="empty">No ranked problems yet. Run the pipeline to analyze articles.</p>
+        {% endfor %}
+    </main>
+</body>
+</html>

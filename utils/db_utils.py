@@ -25,7 +25,8 @@ CREATE TABLE IF NOT EXISTS newsolvr (
     ai_fit INTEGER,
     speed_to_mvp INTEGER,
     business_potential INTEGER,
-    time_relevancy INTEGER
+    time_relevancy INTEGER,
+    total_score INTEGER
 );
 """
 
@@ -72,10 +73,38 @@ def close_db(db_connection):
 
 
 def fetch_unanalyzed_articles(db_connection):
-    """Return list of (uid, content_article) for rows where problem_statement IS NULL."""
+    """Return list of (uid, link_article, content_article) for rows where problem_statement IS NULL."""
     return get_query(
         db_connection,
-        "SELECT uid, content_article FROM newsolvr WHERE problem_statement IS NULL",
+        "SELECT uid, link_article, content_article FROM newsolvr WHERE problem_statement IS NULL",
+    )
+
+
+def fetch_top_ranked_problems(db_connection, limit: int = 20) -> list[dict[str, str | int]]:
+    """Return top rows by total_score (desc). Each item is a dict with problem_statement, link_article, score (total_score). Score pipeline fills total_score later."""
+    rows = get_query(
+        db_connection,
+        """SELECT problem_statement, link_article, total_score FROM newsolvr
+           WHERE problem_statement IS NOT NULL
+           ORDER BY total_score DESC NULLS LAST LIMIT ?""",
+        (limit,),
+    )
+    return [
+        {
+            "problem_statement": row[0] or "",
+            "link_article": row[1] or "",
+            "score": row[2] if row[2] is not None else 0,
+        }
+        for row in rows
+    ]
+
+
+def update_article_content(db_connection, uid: int, content: str) -> None:
+    """Update content_article for the given uid."""
+    run_query(
+        db_connection,
+        "UPDATE newsolvr SET content_article = ? WHERE uid = ?",
+        (content, uid),
     )
 
 
