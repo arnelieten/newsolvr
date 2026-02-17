@@ -123,7 +123,7 @@ def pipeline():
     # run_article_extraction_pipeline()
     # run_html_extraction_pipeline()
     # run_article_analysis_pipeline()
-    run_article_scoring_pipeline()
+    # run_article_scoring_pipeline()
 
 
 if __name__ == "__main__":
