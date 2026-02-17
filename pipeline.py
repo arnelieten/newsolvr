@@ -25,6 +25,7 @@ from utils.news_api_utils import (
     save_news_api_articles,
     transform_news_api_articles,
 )
+from utils.pipeline_dataclasses import SCORE_COLUMNS
 
 # Specifically search for problems/issues in the news api.
 NEWS_API_SEARCH_TOPIC = "technology OR tech OR software OR automation OR artificial intelligence"
@@ -90,30 +91,51 @@ def run_article_analysis_pipeline():
     close_db(conn)
 
 
-def run_article_scoring_pipeline():
-    """Set total_score = weighted average of the 14 rank columns for all analyzed articles."""
+def run_article_scoring_pipeline(params=SCORE_COLUMNS):
+    """Score each article on 100: weighted score based on different subscores in database."""
+
+    cols = ", ".join(params)
     conn = connect_to_db()
     try:
         rows = get_query(
             conn,
-            """SELECT uid, meaningful_problem, pain_intensity, frequency, problem_size,
-               market_growth, willingness_to_pay, target_customer_clarity, problem_awareness,
-               competition, software_solution, ai_fit, speed_to_mvp, business_potential, time_relevancy
-               FROM newsolvr WHERE problem_statement IS NOT NULL""",
+            f"SELECT uid, {cols} FROM newsolvr WHERE problem_statement IS NOT NULL",
         )
-        weights = [1 / 14] * 14
-        size_map = {"niche": 2, "global": 5}
         for row in rows:
-            uid, *vals = row
-            nums = [
-                size_map.get((str(v).strip().lower() if v else ""), 3)
-                if i == 3
-                else (int(v) if v is not None else 0)
-                for i, v in enumerate(vals)
-            ]
-            score = round(sum(w * n for w, n in zip(weights, nums)))
-            run_query(conn, "UPDATE newsolvr SET total_score = ? WHERE uid = ?", (score, uid))
-        print("Pipeline complete: score articles based on important params.")
+            uid = row[0]
+            meaningful_problem = int(row[1])
+            pain_intensity = int(row[2])
+            frequency = int(row[3])
+            market_growth = int(row[5])
+            willingness_to_pay = int(row[6])
+            target_customer_clarity = int(row[7])
+            problem_awareness = int(row[8])
+            competition = int(row[9])
+            software_solution = int(row[10])
+            ai_fit = int(row[11])
+            speed_to_mvp = int(row[12])
+            business_potential = int(row[13])
+            time_relevancy = int(row[14])
+
+            score = 0.0
+            score += meaningful_problem * 3
+            score += pain_intensity * 2
+            score += frequency * 1
+            score += market_growth * 3
+            score += willingness_to_pay * 1
+            score += target_customer_clarity * 1
+            score += problem_awareness * 1
+            score += competition * 1
+            score += software_solution * 2
+            score += ai_fit * 2
+            score += speed_to_mvp * 3
+            score += business_potential * 1
+            score += time_relevancy * 1
+            # current total weights = 22
+
+            final_score = round((score / (22 * 5)) * 100)
+            run_query(conn, "UPDATE newsolvr SET total_score = ? WHERE uid = ?", (final_score, uid))
+        print("Pipeline complete: score articles.")
     finally:
         close_db(conn)
 
@@ -121,9 +143,9 @@ def run_article_scoring_pipeline():
 def pipeline():
     """Pipeline that pulls news articles into database based on current_article_topic and performs LLM-based scoring for relevant problems."""
     # run_article_extraction_pipeline()
-    # run_html_extraction_pipeline()
-    # run_article_analysis_pipeline()
-    # run_article_scoring_pipeline()
+    run_html_extraction_pipeline()
+    run_article_analysis_pipeline()
+    run_article_scoring_pipeline()
 
 
 if __name__ == "__main__":

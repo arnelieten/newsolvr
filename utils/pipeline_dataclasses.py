@@ -19,3 +19,21 @@ class ProblemReport(BaseModel):
     speed_to_mvp: int
     business_potential: int
     time_relevancy: int
+
+
+SCORE_COLUMNS = [
+    "meaningful_problem",
+    "pain_intensity",
+    "frequency",
+    "problem_size",
+    "market_growth",
+    "willingness_to_pay",
+    "target_customer_clarity",
+    "problem_awareness",
+    "competition",
+    "software_solution",
+    "ai_fit",
+    "speed_to_mvp",
+    "business_potential",
+    "time_relevancy",
+]
