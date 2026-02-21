@@ -16,6 +16,8 @@ DB_PATH = os.getenv("DB_PATH")
 # APIs
 NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 GUARDIAN_API_KEY = os.getenv("GUARDIAN_API_KEY")
+TIMES_API_KEY = os.getenv("TIMES_API_KEY")
+TIMES_SECRET = os.getenv("TIMES_SECRET")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # Internal logic

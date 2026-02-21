@@ -18,6 +18,7 @@ from utils.news_api_utils import (
     news_api_extraction_pipeline,
 )
 from utils.pipeline_dataclasses import SCORE_COLUMNS
+from utils.times_api_utils import times_api_extraction_pipeline
 
 SEARCH_TOPIC = "technology OR tech OR software OR automation OR artificial intelligence"
 
@@ -25,6 +26,7 @@ SEARCH_TOPIC = "technology OR tech OR software OR automation OR artificial intel
 def run_article_extraction_pipeline(search_topic: str = SEARCH_TOPIC):
     news_api_extraction_pipeline(search_topic, iterations=1)
     guardian_api_extraction_pipeline(search_topic, iterations=1)
+    times_api_extraction_pipeline(search_topic, iterations=1)
 
 
 def run_html_extraction_pipeline():
