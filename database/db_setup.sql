@@ -3,7 +3,6 @@
 CREATE TABLE IF NOT EXISTS newsolvr (
     uid INTEGER PRIMARY KEY AUTOINCREMENT,
     title_article TEXT,
-    description_article TEXT,
     content_article TEXT,
     link_article TEXT UNIQUE,
     published_date TEXT,

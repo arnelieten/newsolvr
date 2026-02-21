@@ -1,13 +1,6 @@
 import time
-from datetime import datetime, timedelta
 
-from config.config import (
-    LLM_RATE_LIMIT_RPD,
-    LLM_RATE_LIMIT_RPM,
-    NEWS_API_EXTRACTION_LAG_MINUTES,
-    NEWS_API_EXTRACTION_WINDOW,
-    SCRAPE_DELAY_SECONDS,
-)
+from config.config import LLM_RATE_LIMIT_RPD, LLM_RATE_LIMIT_RPM, SCRAPE_DELAY_SECONDS
 from utils.db_utils import (
     close_db,
     connect_to_db,
@@ -17,39 +10,21 @@ from utils.db_utils import (
     save_article_analysis,
     update_article_content,
 )
+from utils.guardian_api_utils import guardian_api_extraction_pipeline
 from utils.llm_utils import analyze_article
 from utils.news_api_utils import (
     extract_article_text,
     fetch_article_html,
-    get_news_api_articles,
-    save_news_api_articles,
-    transform_news_api_articles,
+    news_api_extraction_pipeline,
 )
 from utils.pipeline_dataclasses import SCORE_COLUMNS
 
-# Specifically search for problems/issues in the news api.
-NEWS_API_SEARCH_TOPIC = "technology OR tech OR software OR automation OR artificial intelligence"
+SEARCH_TOPIC = "technology OR tech OR software OR automation OR artificial intelligence"
 
 
-def run_article_extraction_pipeline(iterations: int = 2):
-    """Fetch news articles from News API and persist to database. NEWS_API_EXTRACTION_LAG_MINUTES is needed becasue the free api only allows news from 24 hours back, the NEWS_API_EXTRACTION_WINDOW is a paramter that indicates the time period over which it retrieves all the articles (default 60 minutes). The iterations parameters decides how many windows of 60 minutes are run, default is 24 to capture news for whole day."""
-    conn = connect_to_db()
-    window_delta = timedelta(minutes=NEWS_API_EXTRACTION_WINDOW)
-    lag_delta = timedelta(minutes=NEWS_API_EXTRACTION_LAG_MINUTES)
-
-    to_date = datetime.now() - lag_delta
-    from_date = to_date - window_delta
-
-    for n in range(iterations):
-        raw_news_articles = get_news_api_articles(NEWS_API_SEARCH_TOPIC, from_date, to_date)
-        df_transformed_news_articles = transform_news_api_articles(raw_news_articles)
-        save_news_api_articles(conn, df_transformed_news_articles)
-
-        from_date -= window_delta
-        to_date -= window_delta
-
-    print("Pipeline complete: extract news articles from api.")
-    close_db(conn)
+def run_article_extraction_pipeline(search_topic: str = SEARCH_TOPIC):
+    news_api_extraction_pipeline(search_topic, iterations=1)
+    guardian_api_extraction_pipeline(search_topic, iterations=1)
 
 
 def run_html_extraction_pipeline():
@@ -142,10 +117,10 @@ def run_article_scoring_pipeline(params=SCORE_COLUMNS):
 
 def pipeline():
     """Pipeline that pulls news articles into database based on current_article_topic and performs LLM-based scoring for relevant problems."""
-    # run_article_extraction_pipeline()
-    run_html_extraction_pipeline()
-    run_article_analysis_pipeline()
-    run_article_scoring_pipeline()
+    run_article_extraction_pipeline()
+    # run_html_extraction_pipeline()
+    # run_article_analysis_pipeline()
+    # run_article_scoring_pipeline()
 
 
 if __name__ == "__main__":
