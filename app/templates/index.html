@@ -15,7 +15,7 @@
     <main class="main">
         {% for problem in problems %}
         <article class="card">
-            <p class="card__problem">{{ problem.problem_statement }}</p>
+            <p class="card__problem">{{ problem.problem_summary or problem.problem_statement }}</p>
             <footer class="card__footer">
                 <span class="card__score">Score: {{ problem.score|round(1) }}/100</span>
                 <a class="card__link" href="{{ problem.link_article }}" target="_blank" rel="noopener noreferrer">Read

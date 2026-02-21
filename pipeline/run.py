@@ -138,8 +138,8 @@ def run_article_scoring_pipeline(params=SCORE_COLUMNS):
 
 def pipeline():
     """Pipeline that pulls news articles into database based on current_article_topic and performs LLM-based scoring for relevant problems."""
-    # run_article_extraction_pipeline()
+    run_article_extraction_pipeline()
     run_deduplication_pipeline()
-    # run_html_extraction_pipeline()
-    # run_article_analysis_pipeline()
+    run_html_extraction_pipeline()
+    run_article_analysis_pipeline()
     run_article_scoring_pipeline()

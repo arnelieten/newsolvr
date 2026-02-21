@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS newsolvr (
     content_article TEXT,
     link_article TEXT UNIQUE,
     published_date TEXT,
+    problem_summary TEXT,
     problem_statement TEXT,
     meaningful_problem INTEGER,
     pain_intensity INTEGER,
@@ -34,6 +35,11 @@ def connect_to_db():
     conn = sqlite3.connect(DB_PATH)
     conn.execute(INIT_SQL)
     conn.commit()
+    try:
+        conn.execute("ALTER TABLE newsolvr ADD COLUMN problem_summary TEXT")
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass  # column already exists
     cur = conn.cursor()
     lock = threading.Lock()
     return {"cur": cur, "conn": conn, "lock": lock}
@@ -80,19 +86,20 @@ def fetch_unanalyzed_articles(db_connection):
 
 
 def fetch_top_ranked_problems(db_connection, limit: int = 20) -> list[dict[str, str | int]]:
-    """Return top rows by total_score (desc). Each item is a dict with problem_statement, link_article, score (total_score). Score pipeline fills total_score later."""
+    """Return top rows by total_score (desc). Each item is a dict with problem_summary, problem_statement, link_article, score (total_score). Score pipeline fills total_score later."""
     rows = get_query(
         db_connection,
-        """SELECT problem_statement, link_article, total_score FROM newsolvr
+        """SELECT problem_summary, problem_statement, link_article, total_score FROM newsolvr
            WHERE problem_statement IS NOT NULL
            ORDER BY total_score DESC NULLS LAST LIMIT ?""",
         (limit,),
     )
     return [
         {
-            "problem_statement": row[0] or "",
-            "link_article": row[1] or "",
-            "score": row[2] if row[2] is not None else 0,
+            "problem_summary": row[0] or "",
+            "problem_statement": row[1] or "",
+            "link_article": row[2] or "",
+            "score": row[3] if row[3] is not None else 0,
         }
         for row in rows
     ]
@@ -112,13 +119,14 @@ def save_article_analysis(db_connection, uid: int, report: dict) -> None:
     run_query(
         db_connection,
         """UPDATE newsolvr SET
-            problem_statement = ?, meaningful_problem = ?, pain_intensity = ?,
+            problem_summary = ?, problem_statement = ?, meaningful_problem = ?, pain_intensity = ?,
             frequency = ?, problem_size = ?, market_growth = ?, willingness_to_pay = ?,
             target_customer_clarity = ?, problem_awareness = ?, competition = ?,
             software_solution = ?, ai_fit = ?, speed_to_mvp = ?,
             business_potential = ?, time_relevancy = ?
         WHERE uid = ?""",
         (
+            report["problem_summary"],
             report["problem_statement"],
             report["meaningful_problem"],
             report["pain_intensity"],
