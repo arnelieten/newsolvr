@@ -18,6 +18,7 @@ from pipeline.utils.news_api_utils import (
     news_api_extraction_pipeline,
 )
 from pipeline.utils.pipeline_dataclasses import SCORE_COLUMNS
+from pipeline.utils.timeliness_utils import timeliness_score
 from pipeline.utils.times_api_utils import times_api_extraction_pipeline
 
 SEARCH_TOPIC = "technology OR tech OR software OR automation OR artificial intelligence"
@@ -41,6 +42,7 @@ def run_deduplication_pipeline():
             ) WHERE rn > 1
         )""",
     )
+    print("Pipeline complete: deduplication based on article titles.")
     close_db(conn)
 
 
@@ -91,7 +93,7 @@ def run_article_scoring_pipeline(params=SCORE_COLUMNS):
     try:
         rows = get_query(
             conn,
-            f"SELECT uid, {cols} FROM newsolvr WHERE problem_statement IS NOT NULL",
+            f"SELECT uid, {cols}, published_date FROM newsolvr WHERE problem_statement IS NOT NULL",
         )
         for row in rows:
             uid = row[0]
@@ -108,9 +110,10 @@ def run_article_scoring_pipeline(params=SCORE_COLUMNS):
             speed_to_mvp = int(row[12])
             business_potential = int(row[13])
             time_relevancy = int(row[14])
+            published_date = row[15]
 
             score = 0.0
-            score += meaningful_problem * 3
+            score += meaningful_problem * 5
             score += pain_intensity * 2
             score += frequency * 1
             score += market_growth * 3
@@ -123,9 +126,10 @@ def run_article_scoring_pipeline(params=SCORE_COLUMNS):
             score += speed_to_mvp * 3
             score += business_potential * 1
             score += time_relevancy * 1
-            # current total weights = 22
+            score += timeliness_score(published_date) * 1
+            # total weights = 25
 
-            final_score = round((score / (22 * 5)) * 100)
+            final_score = round((score / (25 * 5)) * 100)
             run_query(conn, "UPDATE newsolvr SET total_score = ? WHERE uid = ?", (final_score, uid))
         print("Pipeline complete: score articles.")
     finally:
@@ -138,4 +142,4 @@ def pipeline():
     run_deduplication_pipeline()
     # run_html_extraction_pipeline()
     # run_article_analysis_pipeline()
-    # run_article_scoring_pipeline()
+    run_article_scoring_pipeline()
