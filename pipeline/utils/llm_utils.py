@@ -14,7 +14,7 @@ def fetch_prompt():
 
 
 def analyze_article(article: str) -> dict:
-    """Returns dict with problem_statement (str) and 14 score keys (int 1–5)."""
+    """Returns dict with problem_statement (str) and 14 score keys (int 0–5)."""
     client = genai.Client(api_key=GEMINI_API_KEY)
     response = client.models.generate_content(
         model="gemini-2.5-flash-lite",

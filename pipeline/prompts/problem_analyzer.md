@@ -18,23 +18,25 @@ Read the whole article. Rephrase the problem_statement like a **concrete, specif
 
 ### 2. Scores (14 keys)
 
-Then score that problem on each dimension below. Each value is an **integer from 1 to 5** only.
+Then score that problem on each dimension below. Each value is an **integer from 0 to 5** only.
 
-| Key                     | 1 → 5 scale                                             | Focus                                                        |
-| ----------------------- | ------------------------------------------------------- | ------------------------------------------------------------ |
-| meaningful_problem      | no/small problem (1) → real, relevant problem (5)       | Is this a real problem people would pay or care about?       |
-| pain_intensity          | annoyance (1) → mission-critical (5)                    | How painful? Financial loss, stress, blocked workflows?      |
-| frequency               | rare (1) → daily/persistent (5)                         | How often does the problem occur?                            |
-| problem_size            | Do not put a score here! put either "niche" or "global" | How many people or companies have this problem?              |
-| market_growth           | stagnant (1) → strong growth (5)                        | Is demand increasing? Regulation, tech, macro trends?        |
-| willingness_to_pay      | low (1) → high (5)                                      | Do people already pay for alternatives? Budget allocated?    |
-| target_customer_clarity | vague/hard to reach (1) → clear, easy to reach (5)      | Can you define who has this problem?                         |
-| problem_awareness       | must educate (1) → already aware (5)                    | Do people know they have the problem?                        |
-| competition             | crowded (1) → under-served (5)                          | Is there white space for a better solution?                  |
-| software_solution       | software unlikely to help (1) → software fits well (5)  | Can software mitigate this problem?                          |
-| ai_fit                  | AI unlikely to help (1) → AI fits well (5)              | Does AI/ML meaningfully improve solving this?                |
-| speed_to_mvp            | years (1) → months (5)                                  | How fast could a small team ship something?                  |
-| business_potential      | low value (1) → high value (5)                          | Clear monetization? Recurring? Retention?                    |
-| time_relevancy          | not important now (1) → highly relevant now (5)         | Why is it important *now*? Regulation, tech shift, behavior? |
+**Scale:** 0 = Terrible (no evidence, not applicable, or clearly wrong) · 1 = Bad (weak or irrelevant) · 2 = Good (some support from the article) · 3 = Very good (solid, clear support) · 4 = Extremely good (strong evidence; use rarely) · 5 = Ultimate best fit (exceptional; use sparingly).
 
-**Rules:** If the article does not give enough information for a dimension, score 1. Do not guess high. Output only valid JSON with the exact keys above.
+| Key                     | 0 → 5 scale                                                                 | Focus                                                        |
+| ----------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| meaningful_problem      | no/irrelevant (0) → small (1) → real, relevant problem (5)                    | Is this a real problem people would pay or care about?       |
+| pain_intensity          | not applicable (0) → annoyance (1) → mission-critical (5)                    | How painful? Financial loss, stress, blocked workflows?      |
+| frequency               | unknown/rare (0–1) → daily/persistent (5)                                    | How often does the problem occur?                            |
+| problem_size            | Do not put a score here! put either "niche" or "global"                      | How many people or companies have this problem?              |
+| market_growth           | unknown/stagnant (0–1) → strong growth (5)                                  | Is demand increasing? Regulation, tech, macro trends?        |
+| willingness_to_pay      | no evidence (0) → low (1) → high (5)                                        | Do people already pay for alternatives? Budget allocated?    |
+| target_customer_clarity | vague/hard to reach (0–1) → clear, easy to reach (5)                         | Can you define who has this problem?                         |
+| problem_awareness       | must educate (0–1) → already aware (5)                                       | Do people know they have the problem?                        |
+| competition             | unknown/crowded (0–1) → under-served (5)                                    | Is there white space for a better solution?                  |
+| software_solution       | software unlikely (0) → fits well (5)                                        | Can software mitigate this problem?                          |
+| ai_fit                  | AI unlikely to help (0) → AI fits well (5)                                  | Does AI/ML meaningfully improve solving this?                |
+| speed_to_mvp            | years/unknown (0–1) → months (5)                                             | How fast could a small team ship something?                  |
+| business_potential      | low/no evidence (0–1) → high value (5)                                      | Clear monetization? Recurring? Retention?                    |
+| time_relevancy          | not important now (0–1) → highly relevant now (5)                            | Why is it important *now*? Regulation, tech shift, behavior? |
+
+**Rules:** If the article does not give enough information for a dimension, score **0**. Do not guess high. Reserve 5 for exceptional cases only; use 4 only with strong evidence. When in doubt, score lower. Output only valid JSON with the exact keys above.

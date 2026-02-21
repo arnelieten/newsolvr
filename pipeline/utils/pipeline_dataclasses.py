@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 class ProblemReport(BaseModel):
-    """Matches problem_analyzer.md: one summary + 14 scores (1–5)."""
+    """Matches problem_analyzer.md: one summary + 14 scores (0–5)."""
 
     problem_statement: str
     meaningful_problem: int
