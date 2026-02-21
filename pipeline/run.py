@@ -1,7 +1,7 @@
 import time
 
 from config.config import LLM_RATE_LIMIT_RPD, LLM_RATE_LIMIT_RPM, SCRAPE_DELAY_SECONDS
-from utils.db_utils import (
+from database import (
     close_db,
     connect_to_db,
     fetch_unanalyzed_articles,
@@ -10,15 +10,15 @@ from utils.db_utils import (
     save_article_analysis,
     update_article_content,
 )
-from utils.guardian_api_utils import guardian_api_extraction_pipeline
-from utils.llm_utils import analyze_article
-from utils.news_api_utils import (
+from pipeline.utils.guardian_api_utils import guardian_api_extraction_pipeline
+from pipeline.utils.llm_utils import analyze_article
+from pipeline.utils.news_api_utils import (
     extract_article_text,
     fetch_article_html,
     news_api_extraction_pipeline,
 )
-from utils.pipeline_dataclasses import SCORE_COLUMNS
-from utils.times_api_utils import times_api_extraction_pipeline
+from pipeline.utils.pipeline_dataclasses import SCORE_COLUMNS
+from pipeline.utils.times_api_utils import times_api_extraction_pipeline
 
 SEARCH_TOPIC = "technology OR tech OR software OR automation OR artificial intelligence"
 
@@ -119,11 +119,7 @@ def run_article_scoring_pipeline(params=SCORE_COLUMNS):
 
 def pipeline():
     """Pipeline that pulls news articles into database based on current_article_topic and performs LLM-based scoring for relevant problems."""
-    run_article_extraction_pipeline()
+    # run_article_extraction_pipeline()
     # run_html_extraction_pipeline()
     # run_article_analysis_pipeline()
-    # run_article_scoring_pipeline()
-
-
-if __name__ == "__main__":
-    pipeline()
+    run_article_scoring_pipeline()

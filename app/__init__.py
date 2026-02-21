@@ -1,6 +1,6 @@
 from flask import Flask, render_template
 
-from utils.db_utils import close_db, connect_to_db, fetch_top_ranked_problems
+from database import close_db, connect_to_db, fetch_top_ranked_problems
 
 
 def create_app():

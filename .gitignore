@@ -4,3 +4,5 @@ ideas.txt
 .env
 .vscode
 *.db
+.venv
+.cursor

@@ -5,11 +5,11 @@ from google import genai
 from google.genai import types
 
 from config.config import GEMINI_API_KEY
-from utils.pipeline_dataclasses import ProblemReport
+from pipeline.utils.pipeline_dataclasses import ProblemReport
 
 
 def fetch_prompt():
-    path = Path(__file__).parent.parent / "prompts" / "problem_analyzer.md"
+    path = Path(__file__).resolve().parent.parent / "prompts" / "problem_analyzer.md"
     return path.read_text(encoding="utf-8")
 
 

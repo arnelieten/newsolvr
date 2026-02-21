@@ -6,7 +6,7 @@ import pandas as pd
 import requests
 
 from config.config import API_EXTRACTION_LAG_MINUTES, API_EXTRACTION_WINDOW, GUARDIAN_API_KEY
-from utils.db_utils import close_db, connect_to_db, run_query
+from database import close_db, connect_to_db, run_query
 
 BASE_URL = "https://content.guardianapis.com/search"
 

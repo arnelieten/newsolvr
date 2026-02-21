@@ -11,7 +11,7 @@ from config.config import (
     FETCH_HTML_TIMEOUT,
     NEWS_API_KEY,
 )
-from utils.db_utils import close_db, connect_to_db, run_query
+from database import close_db, connect_to_db, run_query
 
 
 def get_news_api_articles(topic, from_date, to_date):
@@ -34,7 +34,7 @@ def transform_news_api_articles(raw_news_articles):
     df = df[["title", "content", "publishedAt", "url"]]
     df = df.dropna(subset=["title", "url"])
     df["content"] = df["content"].fillna("")  # allow empty content; scraper can fill later
-    df = df.drop_duplicates(subset="title")
+    df = df.drop_duplicates(subset=["title"])
     return df
 
 

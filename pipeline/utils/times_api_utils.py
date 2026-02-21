@@ -10,7 +10,7 @@ from config.config import (
     API_EXTRACTION_WINDOW,
     TIMES_API_KEY,
 )
-from utils.db_utils import close_db, connect_to_db, run_query
+from database import close_db, connect_to_db, run_query
 
 BASE_URL = "https://api.nytimes.com/svc/search/v2/articlesearch.json"
 

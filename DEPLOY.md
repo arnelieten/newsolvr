@@ -67,4 +67,5 @@ Then: `sudo systemctl daemon-reload`, `sudo systemctl enable newsolvr`, `sudo sy
 ## Notes
 
 - The app only reads from the DB; the pipeline can write to the same SQLite file from the same host.
+- To run the pipeline from the project root: `python -m pipeline` (or `uv run python -m pipeline`).
 - No Redis or extra services required.
