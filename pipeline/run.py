@@ -29,6 +29,21 @@ def run_article_extraction_pipeline(search_topic: str = SEARCH_TOPIC):
     times_api_extraction_pipeline(search_topic, iterations=1)
 
 
+def run_deduplication_pipeline():
+    """Remove duplicate articles (same title_article) in the last 3 days, keeping the earliest by published_date."""
+    conn = connect_to_db()
+    run_query(
+        conn,
+        """DELETE FROM newsolvr WHERE date(published_date) >= date('now', '-3 days') AND uid IN (
+            SELECT uid FROM (
+                SELECT uid, ROW_NUMBER() OVER (PARTITION BY title_article ORDER BY published_date ASC) AS rn
+                FROM newsolvr WHERE date(published_date) >= date('now', '-3 days')
+            ) WHERE rn > 1
+        )""",
+    )
+    close_db(conn)
+
+
 def run_html_extraction_pipeline():
     """Fetch HTML from link_article URLs for unanalyzed articles missing content; extract main text with trafilatura and update content_article."""
     conn = connect_to_db()
@@ -120,6 +135,7 @@ def run_article_scoring_pipeline(params=SCORE_COLUMNS):
 def pipeline():
     """Pipeline that pulls news articles into database based on current_article_topic and performs LLM-based scoring for relevant problems."""
     # run_article_extraction_pipeline()
+    run_deduplication_pipeline()
     # run_html_extraction_pipeline()
     # run_article_analysis_pipeline()
-    run_article_scoring_pipeline()
+    # run_article_scoring_pipeline()
