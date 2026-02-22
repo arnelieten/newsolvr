@@ -20,16 +20,16 @@ from pipeline.scripts.news_api import (
 from pipeline.scripts.pipeline_dataclasses import NUMERIC_SCORE_COLUMNS
 from pipeline.scripts.timeliness_functions import timeliness_score
 from pipeline.scripts.times_api import times_api_extraction_pipeline
-from utils.error_handling import handle_pipeline_errors
+from utils.pipeline_error_handling import handle_pipeline_errors
 
 SEARCH_TOPIC = "technology OR tech OR software OR automation OR artificial intelligence"
 
 
 @handle_pipeline_errors
 def run_article_extraction_pipeline(search_topic: str = SEARCH_TOPIC):
-    news_api_extraction_pipeline(search_topic, iterations=1)
-    guardian_api_extraction_pipeline(search_topic, iterations=1)
-    times_api_extraction_pipeline(search_topic, iterations=1)
+    news_api_extraction_pipeline(search_topic)
+    guardian_api_extraction_pipeline(search_topic)
+    times_api_extraction_pipeline(search_topic)
 
 
 @handle_pipeline_errors

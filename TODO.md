@@ -1,1 +1,0 @@
-make chron job and make frontend/backend run daily
