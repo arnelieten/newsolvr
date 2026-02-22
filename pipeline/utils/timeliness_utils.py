@@ -44,10 +44,10 @@ def timeliness_score(
     published_date: str | None,
     *,
     reference: datetime | None = None,
-    half_life_days: float = 7.0,
-    max_score: float = 5.0,
 ) -> float:
-    """Return 0–5 score: newer articles score higher; older decay by half every half_life_days."""
+    """Return multiplier in [0, 1]: 1 (day 1), 0.99 (day 2), 0.95 (day 3), 0.9 (day 4), 0.8 (day 5+)."""
     days = days_ago(published_date, reference=reference)
-    raw = max_score * (0.5 ** (days / half_life_days))
-    return max(0.0, min(max_score, raw))
+    table = {0: 1.0, 1: 0.99, 2: 0.95, 3: 0.9, 4: 0.8}
+    if days <= 4:
+        return table[int(days)]
+    return 0.8

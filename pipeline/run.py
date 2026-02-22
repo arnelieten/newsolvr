@@ -114,26 +114,45 @@ def run_article_scoring_pipeline(params=None):
             time_relevancy = int(row[13])
             published_date = row[14]
 
-            score = 0.0
-            score += meaningful_problem * 5
-            score += pain_intensity * 2
-            score += frequency * 1
-            score += market_growth * 3
-            score += willingness_to_pay * 1
-            score += target_customer_clarity * 1
-            score += problem_awareness * 1
-            score += competition * 1
-            score += software_solution * 2
-            score += ai_fit * 2
-            score += speed_to_mvp * 3
-            score += business_potential * 1
-            score += time_relevancy * 1
-            score += timeliness_score(published_date) * 1
-            # total weights = 25
+            score_without_timeliness = 0.0
+            score_without_timeliness += meaningful_problem * 5
+            score_without_timeliness += pain_intensity * 2
+            score_without_timeliness += frequency * 1
+            score_without_timeliness += market_growth * 3
+            score_without_timeliness += willingness_to_pay * 1
+            score_without_timeliness += target_customer_clarity * 1
+            score_without_timeliness += problem_awareness * 1
+            score_without_timeliness += competition * 1
+            score_without_timeliness += software_solution * 2
+            score_without_timeliness += ai_fit * 2
+            score_without_timeliness += speed_to_mvp * 3
+            score_without_timeliness += business_potential * 1
+            score_without_timeliness += time_relevancy * 1
+            # total weights without timeliness = 24
 
-            final_score = round((score / (25 * 5)) * 100)
-            run_query(conn, "UPDATE newsolvr SET total_score = ? WHERE uid = ?", (final_score, uid))
+            score = score_without_timeliness * timeliness_score(published_date)
+
+            original_score = round((score_without_timeliness / (24 * 5)) * 100)
+            final_score = round((score / (24 * 5)) * 100)
+            run_query(
+                conn,
+                "UPDATE newsolvr SET original_score = ?, total_score = ? WHERE uid = ?",
+                (original_score, final_score, uid),
+            )
         print("Pipeline complete: score articles.")
+    finally:
+        close_db(conn)
+
+
+def run_database_cleanup_pipeline():
+    """Remove all rows with original_score < 85 so the database keeps only high-value problems."""
+    conn = connect_to_db()
+    try:
+        run_query(
+            conn,
+            "DELETE FROM newsolvr WHERE original_score IS NOT NULL AND original_score < 85",
+        )
+        print("Pipeline complete: database cleanup.")
     finally:
         close_db(conn)
 
@@ -145,3 +164,4 @@ def pipeline():
     # run_html_extraction_pipeline()
     # run_article_analysis_pipeline()
     run_article_scoring_pipeline()
+    # run_database_cleanup_pipeline()

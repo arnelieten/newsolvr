@@ -38,7 +38,8 @@ CREATE TABLE IF NOT EXISTS newsolvr (
     speed_to_mvp INTEGER,
     business_potential INTEGER,
     time_relevancy INTEGER,
-    total_score INTEGER
+    total_score INTEGER,
+    original_score INTEGER
 );
 """
 
@@ -54,6 +55,11 @@ def connect_to_db():
         pass  # column already exists
     try:
         conn.execute("ALTER TABLE newsolvr ADD COLUMN industry TEXT")
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass  # column already exists
+    try:
+        conn.execute("ALTER TABLE newsolvr ADD COLUMN original_score INTEGER")
         conn.commit()
     except sqlite3.OperationalError:
         pass  # column already exists
@@ -108,8 +114,8 @@ def fetch_top_ranked_problems(
     problem_size: str | None = None,
     industry: str | None = None,
 ) -> list[dict[str, str | int | None]]:
-    """Return top rows by total_score (desc). Each item includes problem_summary, problem_statement, link_article, score, problem_size, industry. Optionally filter by problem_size and/or industry."""
-    conditions = ["problem_statement IS NOT NULL"]
+    """Return top rows by total_score (desc) with total_score > 85. Each item includes problem_summary, problem_statement, link_article, score, problem_size, industry. Optionally filter by problem_size and/or industry."""
+    conditions = ["problem_statement IS NOT NULL", "total_score IS NOT NULL", "total_score > 85"]
     params: list[str | int] = []
     if problem_size in ("niche", "global"):
         conditions.append("problem_size = ?")
