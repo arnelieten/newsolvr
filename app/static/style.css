@@ -854,22 +854,108 @@ body.landing-page {
   }
 }
 
-/* Newsolvr: header/main/card (retro match for index) */
-.header {
+/* Newsolvr: bar with hamburger + expandable filter pane */
+.newsolvr-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   background: #333333;
   padding: 1rem 1.5rem;
   border-radius: 0;
   border-bottom: 2px solid #333333;
   box-shadow: none;
-  text-align: center;
 }
 
-.header h1 {
+.newsolvr-bar__title {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 400;
   font-family: 'Press Start 2P', cursive;
   color: #f0f0f0;
+}
+
+.newsolvr-bar__filter-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  background: transparent;
+  border: 2px solid #f0f0f0;
+  border-radius: 0;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 0 #f0f0f0;
+  transition: background-color 0.2s ease;
+}
+
+.newsolvr-bar__filter-toggle:hover {
+  background: #555555;
+}
+
+.newsolvr-bar__filter-toggle:focus {
+  outline: none;
+  box-shadow: 2px 2px 0 0 #69b392;
+}
+
+.newsolvr-bar__hamburger {
+  display: block;
+  width: 1.25rem;
+  height: 0.2rem;
+  background: #f0f0f0;
+  box-shadow: 0 -0.35rem 0 #f0f0f0, 0 0.35rem 0 #f0f0f0;
+}
+
+.filter-pane {
+  max-height: 0;
+  overflow: hidden;
+  background: #f0f0f0;
+  border-bottom: 2px solid #333333;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.65rem;
+  transition: max-height 0.3s ease-out;
+}
+
+.filter-pane--open {
+  max-height: 28rem;
+  overflow: visible;
+}
+
+.filter-pane__section {
+  padding: 1rem 1.5rem;
+  border-bottom: 2px solid #333333;
+}
+
+.filter-pane__section:last-child {
+  border-bottom: none;
+}
+
+.filter-pane__heading {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #333333;
+}
+
+.filter-pane__description {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.55rem;
+  line-height: 1.6;
+  color: #555555;
+}
+
+.filter-pane__description strong {
+  color: #333333;
+}
+
+.filter-pane__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filter-pane__options--industry {
+  gap: 0.5rem;
 }
 
 .filter-strip {

@@ -5,24 +5,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Newsolvr</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=2">
 </head>
 
 <body>
-    <header class="header">
-        <h1>Newsolvr</h1>
+    <header class="newsolvr-bar">
+        <h1 class="newsolvr-bar__title">Newsolvr</h1>
+        <button type="button" class="newsolvr-bar__filter-toggle" aria-label="Open filters" aria-expanded="false" aria-controls="filter-pane" id="filter-toggle">
+            <span class="newsolvr-bar__hamburger" aria-hidden="true"></span>
+        </button>
     </header>
-    <nav class="filter-strip" aria-label="Filter by problem size">
-        <a href="{{ url_for('index', industry=industry_filter) if industry_filter else url_for('index') }}" class="filter-strip__link{% if problem_size_filter is none %} filter-strip__link--active{% endif %}">All</a>
-        <a href="{{ url_for('index', problem_size='niche', industry=industry_filter) if industry_filter else url_for('index', problem_size='niche') }}" class="filter-strip__link{% if problem_size_filter == 'niche' %} filter-strip__link--active{% endif %}">Niche</a>
-        <a href="{{ url_for('index', problem_size='global', industry=industry_filter) if industry_filter else url_for('index', problem_size='global') }}" class="filter-strip__link{% if problem_size_filter == 'global' %} filter-strip__link--active{% endif %}">Global</a>
-    </nav>
-    <nav class="filter-strip filter-strip--industry" aria-label="Filter by industry">
-        <a href="{{ url_for('index', problem_size=problem_size_filter) if problem_size_filter else url_for('index') }}" class="filter-strip__link{% if industry_filter is none %} filter-strip__link--active{% endif %}">All</a>
-        {% for ind in allowed_industries %}
-        <a href="{{ url_for('index', problem_size=problem_size_filter, industry=ind) if problem_size_filter else url_for('index', industry=ind) }}" class="filter-strip__link{% if industry_filter == ind %} filter-strip__link--active{% endif %}">{{ industry_display_labels[ind] }}</a>
-        {% endfor %}
-    </nav>
+    <div id="filter-pane" class="filter-pane" role="region" aria-label="Filter options" aria-hidden="true">
+        <div class="filter-pane__section">
+            <h2 class="filter-pane__heading">Problem size</h2>
+            <p class="filter-pane__description">Filter by how broad the problem is: <strong>All</strong> shows everything; <strong>Niche</strong> = specific, narrow problems; <strong>Global</strong> = large-scale, widespread problems.</p>
+            <div class="filter-pane__options">
+                <a href="{{ url_for('index', industry=industry_filter) if industry_filter else url_for('index') }}" class="filter-strip__link{% if problem_size_filter is none %} filter-strip__link--active{% endif %}">All</a>
+                <a href="{{ url_for('index', problem_size='niche', industry=industry_filter) if industry_filter else url_for('index', problem_size='niche') }}" class="filter-strip__link{% if problem_size_filter == 'niche' %} filter-strip__link--active{% endif %}">Niche</a>
+                <a href="{{ url_for('index', problem_size='global', industry=industry_filter) if industry_filter else url_for('index', problem_size='global') }}" class="filter-strip__link{% if problem_size_filter == 'global' %} filter-strip__link--active{% endif %}">Global</a>
+            </div>
+        </div>
+        <div class="filter-pane__section">
+            <h2 class="filter-pane__heading">Industry</h2>
+            <p class="filter-pane__description">Filter by the sector the problem relates to. Options below:</p>
+            <div class="filter-pane__options filter-pane__options--industry">
+                <a href="{{ url_for('index', problem_size=problem_size_filter) if problem_size_filter else url_for('index') }}" class="filter-strip__link{% if industry_filter is none %} filter-strip__link--active{% endif %}">All</a>
+                {% for ind in allowed_industries %}
+                <a href="{{ url_for('index', problem_size=problem_size_filter, industry=ind) if problem_size_filter else url_for('index', industry=ind) }}" class="filter-strip__link{% if industry_filter == ind %} filter-strip__link--active{% endif %}">{{ industry_display_labels[ind] }}</a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
     <main class="main">
         {% for problem in problems %}
         <article class="card">
@@ -48,6 +61,39 @@
         <p class="empty">No ranked problems yet. Run the pipeline to analyze articles.</p>
         {% endfor %}
     </main>
+    <script>
+        (function () {
+            var STORAGE_KEY = 'newsolvrFilterPaneOpen';
+            var toggle = document.getElementById('filter-toggle');
+            var pane = document.getElementById('filter-pane');
+            if (!toggle || !pane) return;
+
+            function setPaneOpen(open) {
+                if (open) {
+                    pane.classList.add('filter-pane--open');
+                    toggle.setAttribute('aria-expanded', 'true');
+                    toggle.setAttribute('aria-label', 'Close filters');
+                    pane.setAttribute('aria-hidden', 'false');
+                } else {
+                    pane.classList.remove('filter-pane--open');
+                    toggle.setAttribute('aria-expanded', 'false');
+                    toggle.setAttribute('aria-label', 'Open filters');
+                    pane.setAttribute('aria-hidden', 'true');
+                }
+            }
+
+            // Restore pane state after navigation (e.g. after clicking a filter link)
+            if (sessionStorage.getItem(STORAGE_KEY) === 'true') {
+                setPaneOpen(true);
+            }
+
+            toggle.addEventListener('click', function () {
+                var open = !pane.classList.contains('filter-pane--open');
+                setPaneOpen(open);
+                sessionStorage.setItem(STORAGE_KEY, open ? 'true' : 'false');
+            });
+        })();
+    </script>
 </body>
 
 </html>

@@ -20,10 +20,11 @@ def create_app():
 
     @app.route("/")
     def index():
-        problem_size_filter = request.args.get("problem_size")
+        # Default to "All" for both filters when param is missing, empty, or invalid
+        problem_size_filter = request.args.get("problem_size") or None
         if problem_size_filter not in ("niche", "global"):
             problem_size_filter = None
-        industry_filter = request.args.get("industry")
+        industry_filter = request.args.get("industry") or None
         if industry_filter not in ALLOWED_INDUSTRIES:
             industry_filter = None
         db = connect_to_db()
