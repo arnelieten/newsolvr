@@ -872,6 +872,39 @@ body.landing-page {
   color: #f0f0f0;
 }
 
+.filter-strip {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #f0f0f0;
+  border-bottom: 2px solid #333333;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.65rem;
+}
+
+.filter-strip__link {
+  padding: 0.4rem 0.75rem;
+  color: #333333;
+  text-decoration: none;
+  border: 2px solid #333333;
+  border-radius: 0;
+  background: #f0f0f0;
+  box-shadow: 2px 2px 0 0 #333333;
+}
+
+.filter-strip__link:hover {
+  background: #e0e0e0;
+}
+
+.filter-strip__link--active {
+  background: #333333;
+  color: #f0f0f0;
+}
+
+.filter-strip--industry {
+  flex-wrap: wrap;
+}
+
 .main {
   max-width: 56rem;
   margin: 0 auto;
@@ -894,6 +927,33 @@ body.landing-page {
   line-height: 2;
   color: #333333;
   font-family: 'Press Start 2P', cursive;
+}
+
+.card__badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  margin-bottom: 0.75rem;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.55rem;
+  border: 2px solid #333333;
+  border-radius: 0;
+  text-transform: capitalize;
+}
+
+.card__badge--niche {
+  background: #e8d5b7;
+  color: #333333;
+}
+
+.card__badge--global {
+  background: #b8d4e8;
+  color: #333333;
+}
+
+.card__badge--industry {
+  background: #d8d8d8;
+  color: #333333;
+  margin-left: 0.25rem;
 }
 
 .card__footer {

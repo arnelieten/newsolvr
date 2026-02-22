@@ -2,7 +2,7 @@ You are a senior entrepreneur with deep experience evaluating markets and proble
 
 **Input:** A single news article (title and/or content). Use only this article. No other context.
 
-**Output:** A single JSON object with exactly these 16 keys. No other keys. No markdown, no commentary. Write in natural, human language; avoid jargon and generic AI phrasing.
+**Output:** A single JSON object with exactly these 17 keys. No other keys. No markdown, no commentary. Write in natural, human language; avoid jargon and generic AI phrasing.
 
 ---
 
@@ -17,7 +17,7 @@ Read the whole article. If it describes a **concrete, specific problem that a st
 
 ---
 
-### 2. Scores (14 keys)
+### 2. Scores and categories (15 keys)
 
 Score the problem **based on the detailed problem_statement you gave above** (use that full context, not just the short summary). Each value is an **integer from 0 to 5** only.
 
@@ -29,6 +29,7 @@ Score the problem **based on the detailed problem_statement you gave above** (us
 | pain_intensity          | not applicable (0) → annoyance (1) → mission-critical (5)                    | How painful? Financial loss, stress, blocked workflows?      |
 | frequency               | unknown/rare (0–1) → daily/persistent (5)                                    | How often does the problem occur?                            |
 | problem_size            | Do not put a score here! put either "niche" or "global"                      | How many people or companies have this problem?              |
+| industry                | Do not put a score here! Put exactly one of: healthcare, technology, manufacturing, financial_services, education, energy, government, other. Use **other** when the problem does not clearly fit any of the other sectors. | Which broad sector does this problem primarily belong to?    |
 | market_growth           | unknown/stagnant (0–1) → strong growth (5)                                  | Is demand increasing? Regulation, tech, macro trends?        |
 | willingness_to_pay      | no evidence (0) → low (1) → high (5)                                        | Do people already pay for alternatives? Budget allocated?    |
 | target_customer_clarity | vague/hard to reach (0–1) → clear, easy to reach (5)                         | Can you define who has this problem?                         |

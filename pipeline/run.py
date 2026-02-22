@@ -17,7 +17,7 @@ from pipeline.utils.news_api_utils import (
     fetch_article_html,
     news_api_extraction_pipeline,
 )
-from pipeline.utils.pipeline_dataclasses import SCORE_COLUMNS
+from pipeline.utils.pipeline_dataclasses import NUMERIC_SCORE_COLUMNS
 from pipeline.utils.timeliness_utils import timeliness_score
 from pipeline.utils.times_api_utils import times_api_extraction_pipeline
 
@@ -85,8 +85,10 @@ def run_article_analysis_pipeline():
     close_db(conn)
 
 
-def run_article_scoring_pipeline(params=SCORE_COLUMNS):
+def run_article_scoring_pipeline(params=None):
     """Score each article on 100: weighted score based on different subscores in database."""
+    if params is None:
+        params = NUMERIC_SCORE_COLUMNS
 
     cols = ", ".join(params)
     conn = connect_to_db()
@@ -100,17 +102,17 @@ def run_article_scoring_pipeline(params=SCORE_COLUMNS):
             meaningful_problem = int(row[1])
             pain_intensity = int(row[2])
             frequency = int(row[3])
-            market_growth = int(row[5])
-            willingness_to_pay = int(row[6])
-            target_customer_clarity = int(row[7])
-            problem_awareness = int(row[8])
-            competition = int(row[9])
-            software_solution = int(row[10])
-            ai_fit = int(row[11])
-            speed_to_mvp = int(row[12])
-            business_potential = int(row[13])
-            time_relevancy = int(row[14])
-            published_date = row[15]
+            market_growth = int(row[4])
+            willingness_to_pay = int(row[5])
+            target_customer_clarity = int(row[6])
+            problem_awareness = int(row[7])
+            competition = int(row[8])
+            software_solution = int(row[9])
+            ai_fit = int(row[10])
+            speed_to_mvp = int(row[11])
+            business_potential = int(row[12])
+            time_relevancy = int(row[13])
+            published_date = row[14]
 
             score = 0.0
             score += meaningful_problem * 5
@@ -138,8 +140,8 @@ def run_article_scoring_pipeline(params=SCORE_COLUMNS):
 
 def pipeline():
     """Pipeline that pulls news articles into database based on current_article_topic and performs LLM-based scoring for relevant problems."""
-    run_article_extraction_pipeline()
-    run_deduplication_pipeline()
-    run_html_extraction_pipeline()
-    run_article_analysis_pipeline()
+    # run_article_extraction_pipeline()
+    # run_deduplication_pipeline()
+    # run_html_extraction_pipeline()
+    # run_article_analysis_pipeline()
     run_article_scoring_pipeline()

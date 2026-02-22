@@ -12,10 +12,27 @@
     <header class="header">
         <h1>Newsolvr</h1>
     </header>
+    <nav class="filter-strip" aria-label="Filter by problem size">
+        <a href="{{ url_for('index', industry=industry_filter) if industry_filter else url_for('index') }}" class="filter-strip__link{% if problem_size_filter is none %} filter-strip__link--active{% endif %}">All</a>
+        <a href="{{ url_for('index', problem_size='niche', industry=industry_filter) if industry_filter else url_for('index', problem_size='niche') }}" class="filter-strip__link{% if problem_size_filter == 'niche' %} filter-strip__link--active{% endif %}">Niche</a>
+        <a href="{{ url_for('index', problem_size='global', industry=industry_filter) if industry_filter else url_for('index', problem_size='global') }}" class="filter-strip__link{% if problem_size_filter == 'global' %} filter-strip__link--active{% endif %}">Global</a>
+    </nav>
+    <nav class="filter-strip filter-strip--industry" aria-label="Filter by industry">
+        <a href="{{ url_for('index', problem_size=problem_size_filter) if problem_size_filter else url_for('index') }}" class="filter-strip__link{% if industry_filter is none %} filter-strip__link--active{% endif %}">All</a>
+        {% for ind in allowed_industries %}
+        <a href="{{ url_for('index', problem_size=problem_size_filter, industry=ind) if problem_size_filter else url_for('index', industry=ind) }}" class="filter-strip__link{% if industry_filter == ind %} filter-strip__link--active{% endif %}">{{ industry_display_labels[ind] }}</a>
+        {% endfor %}
+    </nav>
     <main class="main">
         {% for problem in problems %}
         <article class="card">
             <p class="card__problem">{{ problem.problem_summary or problem.problem_statement }}</p>
+            {% if problem.problem_size %}
+            <span class="card__badge card__badge--{{ problem.problem_size }}">{{ problem.problem_size }}</span>
+            {% endif %}
+            {% if problem.industry %}
+            <span class="card__badge card__badge--industry">{{ industry_display_labels.get(problem.industry, problem.industry) }}</span>
+            {% endif %}
             <footer class="card__footer">
                 {% if problem.problem_summary and problem.problem_statement %}
                 <details class="card__details">

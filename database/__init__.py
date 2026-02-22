@@ -1,4 +1,5 @@
 from database.db_utils import (
+    ALLOWED_INDUSTRIES,
     close_db,
     connect_to_db,
     fetch_top_ranked_problems,
@@ -10,6 +11,7 @@ from database.db_utils import (
 )
 
 __all__ = [
+    "ALLOWED_INDUSTRIES",
     "close_db",
     "connect_to_db",
     "fetch_top_ranked_problems",

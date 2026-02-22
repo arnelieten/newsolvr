@@ -3,6 +3,17 @@ import threading
 
 from config.config import DB_PATH
 
+ALLOWED_INDUSTRIES = (
+    "healthcare",
+    "technology",
+    "manufacturing",
+    "financial_services",
+    "education",
+    "energy",
+    "government",
+    "other",
+)
+
 INIT_SQL = """
 CREATE TABLE IF NOT EXISTS newsolvr (
     uid INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -16,6 +27,7 @@ CREATE TABLE IF NOT EXISTS newsolvr (
     pain_intensity INTEGER,
     frequency INTEGER,
     problem_size TEXT,
+    industry TEXT,
     market_growth INTEGER,
     willingness_to_pay INTEGER,
     target_customer_clarity INTEGER,
@@ -37,6 +49,11 @@ def connect_to_db():
     conn.commit()
     try:
         conn.execute("ALTER TABLE newsolvr ADD COLUMN problem_summary TEXT")
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass  # column already exists
+    try:
+        conn.execute("ALTER TABLE newsolvr ADD COLUMN industry TEXT")
         conn.commit()
     except sqlite3.OperationalError:
         pass  # column already exists
@@ -85,21 +102,35 @@ def fetch_unanalyzed_articles(db_connection):
     )
 
 
-def fetch_top_ranked_problems(db_connection, limit: int = 20) -> list[dict[str, str | int]]:
-    """Return top rows by total_score (desc). Each item is a dict with problem_summary, problem_statement, link_article, score (total_score). Score pipeline fills total_score later."""
-    rows = get_query(
-        db_connection,
-        """SELECT problem_summary, problem_statement, link_article, total_score FROM newsolvr
-           WHERE problem_statement IS NOT NULL
-           ORDER BY total_score DESC NULLS LAST LIMIT ?""",
-        (limit,),
-    )
+def fetch_top_ranked_problems(
+    db_connection,
+    limit: int = 20,
+    problem_size: str | None = None,
+    industry: str | None = None,
+) -> list[dict[str, str | int | None]]:
+    """Return top rows by total_score (desc). Each item includes problem_summary, problem_statement, link_article, score, problem_size, industry. Optionally filter by problem_size and/or industry."""
+    conditions = ["problem_statement IS NOT NULL"]
+    params: list[str | int] = []
+    if problem_size in ("niche", "global"):
+        conditions.append("problem_size = ?")
+        params.append(problem_size)
+    if industry in ALLOWED_INDUSTRIES:
+        conditions.append("industry = ?")
+        params.append(industry)
+    params.append(limit)
+    where = " AND ".join(conditions)
+    query = f"""SELECT problem_summary, problem_statement, link_article, total_score, problem_size, industry FROM newsolvr
+                   WHERE {where}
+                   ORDER BY total_score DESC NULLS LAST LIMIT ?"""
+    rows = get_query(db_connection, query, tuple(params))
     return [
         {
             "problem_summary": row[0] or "",
             "problem_statement": row[1] or "",
             "link_article": row[2] or "",
             "score": row[3] if row[3] is not None else 0,
+            "problem_size": row[4] if len(row) > 4 else None,
+            "industry": row[5] if len(row) > 5 else None,
         }
         for row in rows
     ]
@@ -116,11 +147,17 @@ def update_article_content(db_connection, uid: int, content: str) -> None:
 
 def save_article_analysis(db_connection, uid: int, report: dict) -> None:
     """Saves an LLM-analyzed article to the database."""
+    problem_size = report["problem_size"]
+    if isinstance(problem_size, str):
+        problem_size = problem_size.strip().lower()
+    industry = report["industry"]
+    if isinstance(industry, str):
+        industry = industry.strip().lower().replace(" ", "_")
     run_query(
         db_connection,
         """UPDATE newsolvr SET
             problem_summary = ?, problem_statement = ?, meaningful_problem = ?, pain_intensity = ?,
-            frequency = ?, problem_size = ?, market_growth = ?, willingness_to_pay = ?,
+            frequency = ?, problem_size = ?, industry = ?, market_growth = ?, willingness_to_pay = ?,
             target_customer_clarity = ?, problem_awareness = ?, competition = ?,
             software_solution = ?, ai_fit = ?, speed_to_mvp = ?,
             business_potential = ?, time_relevancy = ?
@@ -131,7 +168,8 @@ def save_article_analysis(db_connection, uid: int, report: dict) -> None:
             report["meaningful_problem"],
             report["pain_intensity"],
             report["frequency"],
-            report["problem_size"],
+            problem_size,
+            industry,
             report["market_growth"],
             report["willingness_to_pay"],
             report["target_customer_clarity"],
