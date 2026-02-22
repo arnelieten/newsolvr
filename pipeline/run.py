@@ -10,16 +10,16 @@ from database import (
     save_article_analysis,
     update_article_content,
 )
-from pipeline.utils.guardian_api_utils import guardian_api_extraction_pipeline
-from pipeline.utils.llm_utils import analyze_article
-from pipeline.utils.news_api_utils import (
+from pipeline.scripts.guardian_api import guardian_api_extraction_pipeline
+from pipeline.scripts.llm_functions import analyze_article
+from pipeline.scripts.news_api import (
     extract_article_text,
     fetch_article_html,
     news_api_extraction_pipeline,
 )
-from pipeline.utils.pipeline_dataclasses import NUMERIC_SCORE_COLUMNS
-from pipeline.utils.timeliness_utils import timeliness_score
-from pipeline.utils.times_api_utils import times_api_extraction_pipeline
+from pipeline.scripts.pipeline_dataclasses import NUMERIC_SCORE_COLUMNS
+from pipeline.scripts.timeliness_functions import timeliness_score
+from pipeline.scripts.times_api import times_api_extraction_pipeline
 
 SEARCH_TOPIC = "technology OR tech OR software OR automation OR artificial intelligence"
 
@@ -159,9 +159,9 @@ def run_database_cleanup_pipeline():
 
 def pipeline():
     """Pipeline that pulls news articles into database based on current_article_topic and performs LLM-based scoring for relevant problems."""
-    # run_article_extraction_pipeline()
-    # run_deduplication_pipeline()
-    # run_html_extraction_pipeline()
-    # run_article_analysis_pipeline()
+    run_article_extraction_pipeline()
+    run_deduplication_pipeline()
+    run_html_extraction_pipeline()
+    run_article_analysis_pipeline()
     run_article_scoring_pipeline()
-    # run_database_cleanup_pipeline()
+    run_database_cleanup_pipeline()
